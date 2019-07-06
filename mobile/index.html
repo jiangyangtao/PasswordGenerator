@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="icon" href="icon/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="icon/favicon.ico" type="image/x-icon"/>
+    <meta charset="utf-8" />
+    <title>密码生成器</title>
+    <link rel="stylesheet" href="scripts/iview/dist/styles/iview.css">
+    <style type="text/css">
+        .container {background:#f9f9f9;padding: 15px}
+        .container .ivu-card .ivu-card-head {text-align: center;}
+        .container .ivu-card .ivu-card-head .title {font-size: 30px;margin-right: 160px;}
+        .container .ivu-card .ivu-card-body {height: 90vh;}
+        .container .ivu-card .ivu-card-body .main .options {width:500px;margin: 30px auto 0;}
+        .container .ivu-card .ivu-card-body .main .options .contains-symbol {margin: 0 30px;}
+        .container .ivu-card .ivu-card-body .main .build {width:300px;margin: 60px auto 90px;}
+        .container .ivu-card .ivu-card-body .main .build .build-btn {width: 150px;height: 36px;font-size: 14px;}
+        .container .ivu-card .ivu-card-body .main .password {width: 93%;text-align: center;font-size: 50px;}
+        .container .ivu-card .ivu-card-body .main .password .ivu-tooltip .ivu-tooltip-rel {cursor: pointer;background-color: #eaeaea;padding: 15px 40px;border-radius: 6px;}
+    </style>
+    <script type="text/javascript" charset="utf-8" src="scripts/device.js"></script>
+    <script type="text/javascript" charset="utf-8" src="scripts/extensions.js"></script>
+    <script type="text/javascript" charset="utf-8" src="scripts/vue.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="scripts/iview/dist/iview.min.js"></script>    
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <Card :bordered="false">
+                <div slot="title" class="title">密码生成器</div>
+                <div class="main">
+                    <div class="options">
+                        <span>长度：</span>
+                        <input-number :max="100" :min="1" v-model="length"></input-number>
+                        <Checkbox class="contains-symbol" v-model="containsSymbol">包含符号</Checkbox>
+                        <Checkbox v-model="containsAtSymbol">包含@符号</Checkbox>                        
+                    </div>
+                    <div class="build">
+                        <i-button class="build-btn" type="primary" @click="createPassword">生成密码</i-button>
+                    </div>                    
+                    <div class="password">
+                        <Tooltip content="点我复制" @click.native="copyPassword" placement="top">{{ password }}</Tooltip>
+                    </div>
+                </div>
+            </Card>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" charset="utf-8">
+    var app = new Vue({
+        el: '#app',
+        data: {
+            length:8,
+            containsAtSymbol:false,
+            containsSymbol:false,
+            password:'',
+            key:'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            symbol:'~!@#$%^&*()_+`-=',
+            atSymbol:'@',
+        },
+        beforeCreate(){
+            console.log(device.mobile());
+        },
+        mounted(){            
+            this.createPassword();
+        },
+        methods:{
+            createPassword(){
+                let _key = this.key;
+                if(this.containsSymbol) _key = this.key + this.symbol;
+
+                let passwordStr = '';
+                for (let index = 0; index < this.length; index++) {
+                    passwordStr += _key.substr(Math.createRandom(0, _key.length) - 1, 1);
+                }
+                if(this.containsAtSymbol && passwordStr.indexOf('@') === -1) {
+                    passwordStr = this.joinAtSymbol(passwordStr);
+                }
+                this.password = passwordStr;         
+            },
+            joinAtSymbol(password){
+                const key =password.substr(Math.createRandom(0, password.length) - 1, 1);
+                return password.replace(key,this.atSymbol);
+            },
+            copyPassword(e){
+                const input = document.createElement('input');
+                input.type = "text";
+                input.setAttribute('readonly', 'readonly'); 
+                input.value = this.password;
+                document.body.appendChild(input);
+                input.select();
+                input.setSelectionRange(0, input.value.length);
+                document.execCommand("Copy");
+                input.style.display='none';
+                document.body.removeChild(input);
+                this.$Message.success({
+                    top: 1150,
+                    duration: 4,
+                    content:'复制成功！'
+                });
+            },
+        },
+    });
+</script>
+</html>
