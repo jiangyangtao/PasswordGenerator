@@ -60,7 +60,9 @@
             atSymbol:'@',
         },
         beforeCreate(){
-            console.log(device.mobile());
+            if(device.mobile()){
+                location.href = 'http://password.mobile.yangtao1.com/';
+            }
         },
         mounted(){            
             this.createPassword();
